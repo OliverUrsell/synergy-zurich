@@ -115,10 +115,41 @@ public class SignalController : MonoBehaviour
         GenerateRequest();
     }
 
+    float assessOverlap(overlap o){
+        float difference = 0f;
+        room room = SignalController.idToRoom[o.id];
+        difference += Mathf.Abs(room.sensors.brightness - SettingsPage.brightness);
+        difference += Mathf.Abs(room.sensors.temperature - SettingsPage.temperature);
+        return difference;
+    }
+
+    overlap min_difference_overlap = null;
+
+    public void findMinDiffOverlap(){
+        if(idToRoom != null){
+            var overlapComponents = FindObjectsOfType<overlap>() as overlap[];
+            float min_difference = -1f;
+            foreach(overlap o in overlapComponents){
+                float diff = assessOverlap(o);
+                if(min_difference == -1f || min_difference > diff){
+                    min_difference = diff;
+                    min_difference_overlap = o;
+                }
+                o.setColorWithSignals();
+            }
+
+            min_difference_overlap.setColour(new Color(0f,255f/255f,0f));
+        }
+    }
+
     void updateOverlapColors(){
         var overlapComponents = FindObjectsOfType<overlap>() as overlap[];
         foreach(overlap o in overlapComponents){
             o.setColorWithSignals();
+        }
+
+        if(min_difference_overlap != null){
+            min_difference_overlap.setColour(new Color(0f,255f/255f,0f));
         }
     }
 
